@@ -289,7 +289,7 @@ This makes the demonstrations much easier to collect than relying on arm teleop 
 
 Once the robot, cameras, teleop node, and gripper-control node are all running, record the session with rosbag.
 
-Use the dual-camera rosbag command from the internal documentation:
+Use the dual-camera rosbag command:
 ```
   ros2 bag record \
   /camera1/camera1/color/image_raw/compressed \

@@ -71,6 +71,65 @@ Typical shell setup:
 
 If your workspace path is different, adjust accordingly.
 
+For the Pi0 runtime controller, use a separate Python 3.10 conda environment that is compatible with system ROS 2 Humble. Do not use a Python 3.11 environment for the ROS-based controller runtime, because `rclpy` will not work correctly with the Humble system install.
+
+
+## Prerequisites and Software Installation
+
+Before using this robot runtime stack, make sure the base software dependencies are installed and configured.
+
+### Hardware Requirements
+
+- Kinova Gen3 arm
+- Robotiq 2F-85 gripper
+- Ubuntu 22.04 machine
+- ROS 2 Humble installed
+- Ethernet connection to the robot
+- Two Intel RealSense cameras
+- Xbox controller for teleoperation
+
+### ROS 2 Packages
+
+Install the required Kinova packages:
+```
+  sudo apt install ros-humble-kortex-bringup
+  sudo apt install ros-humble-kinova-gen3-7dof-robotiq-2f-85-moveit-config
+```
+Install the RealSense ROS 2 package:
+```
+  sudo apt install ros-humble-realsense2-camera
+```
+### Fix xacro Parameter Mismatch
+
+Depending on the installed package versions, the apt-installed `robotiq_description` may be missing parameters expected by `kortex_description`.
+
+Edit:
+```
+  sudo nano /opt/ros/humble/share/robotiq_description/urdf/robotiq_2f_85_macro.urdf.xacro
+```
+Find the line containing:
+```
+  com_port:=/dev/ttyUSB0">
+```
+and change it to:
+```
+  com_port:=/dev/ttyUSB0
+  isaac_joint_commands:=false
+  isaac_joint_states:=false">
+```
+This resolves a parameter mismatch between the Robotiq and Kortex xacro files.
+
+### Verify Robot Connectivity
+
+Check network connectivity:
+```
+  ping 192.168.1.10
+```
+You can also verify the robot through the Kinova web interface by opening:
+```
+  http://192.168.1.10
+```
+
 
 ## 1. Robot Network Setup
 
@@ -106,6 +165,8 @@ After saving, test connectivity:
   ping 192.168.1.10
 ```
 
+Replace your current `## 2. Base Robot Bringup` section with the version below.
+
 ## 2. Base Robot Bringup
 
 The first thing you should launch is the Kinova driver.
@@ -124,10 +185,44 @@ You do not need to leave `ros2 topic echo` running forever. This is just a quick
 
 At this point the robot should be connected and ready, and the controllers should be available through the controller manager.
 
+You can also test the gripper directly through the action server.
+
+Open gripper:
+```
+  ros2 action send_goal /robotiq_gripper_controller/gripper_cmd control_msgs/action/GripperCommand "{command:{position: 0.0, max_effort: 100.0}}"
+```
+Close gripper:
+```
+  ros2 action send_goal /robotiq_gripper_controller/gripper_cmd control_msgs/action/GripperCommand "{command:{position: 0.7, max_effort: 100.0}}"
+```
+Typical gripper position values:
+- `0.0` = fully open
+- `0.7` = fully closed
 
 ## 3. Base Camera Bringup
 
-The system uses two RealSense cameras. Each camera has its own serial number. For example, here are the serial numbers of the two cameras used in the study:
+The system uses two RealSense cameras. Each camera has its own serial number. 
+You can test a single camera first with:
+```
+  ros2 launch realsense2_camera rs_launch.py
+```
+For dual-camera operation, the lab uses a custom `rs_dual_camera_launch.py` that disables unnecessary depth and point cloud processing and sets the expected defaults.
+
+To locate the installed dual-camera launch file:
+```
+  find ~ -name 'rs_dual_camera_launch.py' 2>/dev/null
+```
+If needed, replace the installed launch file with the lab version in this repository
+
+To verify camera throughput, check that the compressed topics are publishing near 30 Hz:
+```
+  ros2 topic list | grep compressed
+  ros2 topic hz /camera1/camera1/color/image_raw/compressed
+  ros2 topic hz /camera2/camera2/color/image_raw/compressed
+```
+Expected output: the average rate should be approximately 30 Hz.
+
+Here are the serial numbers of the two cameras used in the study:
 
 - D415 serial: `021422060548`
 - D435i serial: `947522071402`
@@ -359,6 +454,25 @@ Then:
 - control the gripper with the button inputs
 - stop the bag recording when done (Press Ctrl+C)
 
+## ROS Environment for the Pi0 Runtime Controller
+
+The Pi0 runtime controller should be run in a separate conda environment that is compatible with ROS 2 Humble.
+
+### Create the Environment
+```
+  conda create -n openpi_ros python=3.10 -y
+  conda activate openpi_ros
+```
+### Install Dependencies
+```
+  pip install numpy opencv-python typing_extensions
+  pip install -e ~/pi_ws/openpi-LBMfailure/packages/openpi-client
+```
+This requires the user to have clones the openpi-LBMfailure repository. The path above can be changed, but must point to the openpi-client package like above.
+### Important Environment Notes
+
+- The `openpi_ros` environment uses Python 3.10 to match the system ROS 2 Humble `rclpy` build.
+- Do not use the `openpi` training environment if it is based on Python 3.11 for running the ROS controller.
 
 ## Running the Pi0 Model (Inference Loop)
 

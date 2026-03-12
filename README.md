@@ -406,7 +406,7 @@ Press Ctrl+C when the demonstration is complete.
 
 Each recording becomes a rosbag that can later be converted into one training episode in the dataset pipeline.
 
-Each ros2 node/command should be run in a different terminal window. For convenience, the user may install the Terminator Terminal Emulator:
+Each ROS node or command shown below should generally be run in a separate terminal window. For convenience, many lab members use Terminator to manage the multi-terminal workflow:
 https://github.com/gnome-terminator/terminator
 
 A typical full data-collection session therefore looks like this:
@@ -512,6 +512,8 @@ Terminal 2:
 ```
 Terminal 3:
 ```
+  conda activate openpi_ros
+  cd ../path/to/script (E.g. ~/pi_ws/openpi-LBMfailure/scripts)
   python3 inferenceloopRTC.py --host 128.253.224.8 --port 8000 --compressed --control-hz 20 --prompt "pick up the blue cup and place it in blue bin" --speed-scale 1.3 --gripper-action position --goal-hz 2
 ```
 This example keeps the inference section intentionally light. The important point is that:
@@ -623,3 +625,4 @@ Use the separate dataset pipeline README to:
 - When in doubt, check `ros2 topic list`, `ros2 topic echo [TOPIC_NAME]` `ros2 action list`, and `ros2 control list_controllers` to verify the runtime state.
 - Be careful when homing. There is no collision avoidance in the example command.
 - If the RealSense topics do not match the examples exactly, inspect the live topic list and update commands accordingly.
+- Use the `openpi_ros` Python 3.10 environment for ROS runtime control. Do not use the Python 3.11 training environment for `inferenceloopRTC.py`.

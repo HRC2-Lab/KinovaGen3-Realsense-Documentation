@@ -145,15 +145,15 @@ The laptop ethernet static IP should be set to:
 - netmask `255.255.255.0`
 
 If you are unsure which ethernet device is the robot cable, unplug the cable and compare the output of:
-
+```
   ip a
-
+```
 Then reconnect it and identify the interface that reappears.
 
 If needed, open the Network Manager editor:
-
+```
   sudo nm-connection-editor
-
+```
 For the relevant wired connection:
 
 - Set IPv4 Method to `Manual`

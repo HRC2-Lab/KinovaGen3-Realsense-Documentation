@@ -45,17 +45,17 @@ Assumes [One-Time Machine Setup](#one-time-machine-setup) is already done. Each 
 
 ### Data Collection Session
 
-# Terminal 1 — robot driver
+#### Terminal 1 — robot driver
 ```
 ros2 launch kortex_bringup gen3.launch.py robot_ip:=192.168.1.10 gripper:=robotiq_2f_85
 ```
 
-# Terminal 2 — cameras
+#### Terminal 2 — cameras
 ```
 ros2 launch realsense2_camera rs_dual_camera_launch.py serial_no1:=_021422060548 serial_no2:=_947522071402
 ```
 
-# Terminal 3 — switch to twist control
+#### Terminal 3 — switch to twist control
 ```
 ros2 service call /controller_manager/switch_controller controller_manager_msgs/srv/SwitchController "{
 activate_controllers: [twist_controller],
@@ -65,14 +65,18 @@ activate_asap: true,
 }"
 ```
 
-# Terminal 4 — joystick teleop (arm motion)
+#### Terminal 4 — joystick teleop (arm motion)
 ```
 ros2 launch teleop_twist_joy teleop-launch.py joy_config:='better_xbox' joy_vel:='/twist_controller/commands'
+```
 
-# Terminal 5 — gripper control
+#### Terminal 5 — gripper control
+```
 python3 joy_to_kinova.py
+```
 
-# Terminal 6 — record the demonstration
+#### Terminal 6 — record the demonstration
+```
 ros2 bag record \
   /camera1/camera1/color/image_raw/compressed \
   /camera1/camera1/color/camera_info \
@@ -87,16 +91,18 @@ Teleoperate with the Xbox stick, control the gripper with the mapped buttons, an
 
 ### Inference Session
 
-# Terminal 1 — robot driver
+#### Terminal 1 — robot driver
 ```
 ros2 launch kortex_bringup gen3.launch.py robot_ip:=192.168.1.10 gripper:=robotiq_2f_85
 ```
 
-# Terminal 2 — cameras
+#### Terminal 2 — cameras
 ```
 ros2 launch realsense2_camera rs_dual_camera_launch.py serial_no1:=_021422060548 serial_no2:=_947522071402
+```
 
-# Terminal 3 — run the policy (robot stays on the trajectory controller — do NOT switch to twist)
+#### Terminal 3 — run the policy (robot stays on the trajectory controller — do NOT switch to twist)
+```
 conda activate openpi_ros
 cd ../path/to/script (E.g. ~/pi_ws/openpi-LBMfailure/scripts)
 python3 inferenceloopRTC.py --host 128.253.224.8 --port 8000 --compressed --control-hz 20 \

@@ -1,5 +1,6 @@
 # Kinova Gen3 Robot Runtime README
-(This is a Claude Code rewrite of the original README.md)
+> [!NOTE]
+> This is a Claude Code rewrite of the original README.md
 
 This README describes the full robot runtime pipeline used in our lab for the Kinova Gen3 arm. The system is built entirely on ROS 2 and integrates the Kinova robot, Intel RealSense cameras, Xbox-controller teleoperation for data collection, rosbag logging, and execution of a trained Pi0 policy.
 
